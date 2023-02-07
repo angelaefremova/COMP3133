@@ -31,36 +31,37 @@ app.get("/", (req, res) => {
 });
 
 app.get("/logout", (req, res) => {
-    res.sendFile(__dirname + "/views/login.html");
-  });
+  res.sendFile(__dirname + "/views/login.html");
+});
 
 app.get("/register", function (req, res) {
   res.sendFile(__dirname + "/views/register.html");
 });
 
 app.get("/chat", function (req, res) {
-    res.sendFile(__dirname + "/chat.html");
-  });
-
+  res.sendFile(__dirname + "/chat.html");
+});
 
 app.post("/register", async function (req, res) {
   try {
-    if (!(await UserModel.find({username: req.body.username}))) {
-        const new_user = new UserModel({ ...req.body, createon: Date.now() });
-    var saved_user = new_user.save();
-  //   res.status(200).send({
-  //     status: true,
-  //     message: `New user ${JSON.stringify(new_user)} created`,
-  //   });
-    res.sendFile(__dirname + "/index.html");
+    if (!(await UserModel.find({ username: req.body.username }))) {
+      const new_user = new UserModel({ ...req.body, createon: Date.now() });
+      var saved_user = new_user.save();
+      //   res.status(200).send({
+      //     status: true,
+      //     message: `New user ${JSON.stringify(new_user)} created`,
+      //   });
+      res.sendFile(__dirname + "/index.html");
     } else {
-        throw new Error(`User ${req.body.username} is not available. Please try something else!`)
+      throw new Error(
+        `User ${req.body.username} is not available. Please try something else!`
+      );
     }
   } catch (err) {
-      res.status(400).send({
-          status: false,
-          message: err.message
-      })
+    res.status(400).send({
+      status: false,
+      message: err.message,
+    });
   }
 });
 
@@ -69,19 +70,17 @@ app.get("/login", function (req, res) {
 });
 
 app.post("/login", async (req, res) => {
-    
-    try {
-        
-        var saved_user = await UserModel.find({ username: req.body.username })
-        res.sendFile(__dirname + "/index.html");
-    } catch (err) {
-        res.status(400).send({
-            status: false,
-            
-            message: err.message
-        })
-    }
-  });
+  try {
+    var saved_user = await UserModel.find({ username: req.body.username });
+    res.sendFile(__dirname + "/index.html");
+  } catch (err) {
+    res.status(400).send({
+      status: false,
+
+      message: err.message,
+    });
+  }
+});
 
 // Socket.io
 io.on("connection", (socket) => {
@@ -99,12 +98,6 @@ io.on("connection", (socket) => {
 io.on("connection", (socket) => {
   socket.on("chat message", (msg) => {
     console.log("message: " + msg);
-  });
-});
-
-io.on("connection", (socket) => {
-  socket.on("chat message", (msg) => {
-    io.emit("chat message", msg);
   });
 });
 
