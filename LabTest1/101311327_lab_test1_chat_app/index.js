@@ -2,6 +2,8 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const UserModel = require("./models/Users.js");
+const GroupModel = require("./models/GroupMessage.js");
+const PrivateModel = require("./models/PrivateMessage.js");
 const app = express();
 const http = require("http");
 const server = http.createServer(app);
@@ -13,7 +15,7 @@ app.use(express.json());
 
 mongoose
   .connect(
-    "mongodb+srv://101311327-Angela:school@cluster0.sjruygg.mongodb.net/ChatterBox?retryWrites=true&w=majority",
+    "mongodb+srv://user:pass@cluster0.sjruygg.mongodb.net/ChatterBox?retryWrites=true&w=majority",
     {
       useNewUrlParser: true,
       useUnifiedTopology: true,
@@ -54,7 +56,8 @@ app.post("/register", async function (req, res) {
       res.sendFile(__dirname + "/index.html");
     } else {
       throw new Error(
-        `User ${req.body.username} is not available. Please try something else!`
+        // `User ${req.body.username} is not available. Try Again!`
+        res.sendFile(__dirname + "/views/register.html")
       );
     }
   } catch (err) {
@@ -84,16 +87,45 @@ app.post("/login", async (req, res) => {
 
 // Socket.io
 io.on("connection", (socket) => {
+  GroupModel.find().then((msg) => {
+    io.emit("chat message", msg);
+  });
+  PrivateModel.find().then((msg) => {
+    io.emit("chat message", msg);
+  });
   console.log("a user connected");
   socket.on("disconnect", () => {
     console.log("user disconnected");
   });
 
   socket.on("chat message", (msg) => {
-    io.emit("chat message", msg);
+    // const newGroupMsg = new GroupModel({
+    //   from_user,
+    //   room,
+    //   messaage,
+    //   date_sent: Date.now(),
+    // });
+    // newGroupMsg.save().then(() => {
+    //   io.emit("chat message", msg);
+    // });
+    // const newPrivateMsg = new PrivateModel({
+    //     from_user,
+    //     to_user,
+    //     messaage,
+    //     date_sent: Date.now(),
+    //   });
+    //   newPrivateMsg.save().then(() => {
+    //     io.emit("chat message", msg);
+    //   });
     console.log("message: " + msg);
   });
 });
+
+io.on('connection', (socket) => {
+    socket.on('chat message', (msg) => {
+      io.emit('chat message', msg);
+    });
+  });
 
 io.on("connection", (socket) => {
   socket.on("chat message", (msg) => {
