@@ -1,18 +1,14 @@
 const express = require("express");
 const { ApolloServer, gql } = require("apollo-server-express");
-const employee = require("./employee");
-const user = require("./user");
-const employeeResolvers = require("./routes/EmployeeRoutes");
-const userResolvers = require("./routes/UserRoutes");
+const typeDefs = require("./typeDefs");
+const resolvers = require("./resolvers");
 const mongoose = require("mongoose");
 
 async function startServer() {
   const app = express();
   const apolloServer = new ApolloServer({
-    employee,
-    employeeResolvers,
-    user,
-    userResolvers
+    typeDefs,
+    resolvers,
   });
 
   await apolloServer.start();
