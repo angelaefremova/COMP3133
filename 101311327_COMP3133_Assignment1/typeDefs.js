@@ -9,18 +9,12 @@ const typeDefs = gql`
     gender: String
     salary: Float
   }
+  
   type User {
     id: ID
     username: String
     email: String
     password: String
-  }
-
-  type Query {
-    getAllEmployees: [Employee]
-    getAllUsers: [User]
-    getEmployee(id: ID): Employee
-    getUser(id: ID): User
   }
 
   input EmployeeInput {
@@ -37,14 +31,17 @@ const typeDefs = gql`
     password: String
   }
 
+  type Query {
+    getAllEmployees: [Employee]
+    getEmployee(id: ID): Employee
+    login(username: String!, password: String!): User
+  }
+
   type Mutation {
     createEmployee(employee: EmployeeInput): Employee
     deleteEmployee(id: ID): String
     updateEmployee(id: ID, employee: EmployeeInput): Employee
-
-    createUser(user: UserInput): User
-    deleteUser(id: ID): String
-    updateUser(id: ID, user: UserInput): User
+    signup(user: UserInput): User
   }
 `;
 

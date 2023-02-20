@@ -1,4 +1,5 @@
 const { title } = require("process");
+const bcrypt = require("bcrypt");
 const User = require("./models/User");
 const Employee = require("./models/Employee");
 
@@ -10,11 +11,15 @@ const resolvers = {
     getEmployee: async (_parent, { id }, _context, _info) => {
       return await Employee.findById(id);
     },
-    getAllUsers: async () => {
-      return await User.find();
-    },
-    getUser: async (_parent, { id }, _context, _info) => {
-      return await User.findById(id);
+    login: async (_parent, {username, password}, _context, _info) => {
+      const user = await User.findOne({ username })
+      if (!user) {
+        throw new Error('User Does Not Exist')
+      }
+      const isValid = await bcrypt.compare(password, user.password);
+      if (!isValid) {
+        throw new Error("Invalid Password");
+      }
     },
   },
   Mutation: {
@@ -52,33 +57,14 @@ const resolvers = {
       const employee = await Employee.findByIdAndUpdate(id, updates, { new: true });
       return employee;
     },
-    createUser: async (parent, args, context, info) => {
-      const { username, email, password } = args.user;
-      console.log( username, email, password);
-      const user = new User({  username, email, password});
-      await user.save();
-      return user;
-    },
-    deleteUser: async (parent, args, context, info) => {
-      const { id } = args;
-      await User.findByIdAndDelete(id);
-      return "User Was Deleted";
-    },
-    updateUser: async (parent, args, context, info) => {
-      const { id } = args;
-      const {  username, email, password } = args.user;
-      const updates = {};
-      if (username !== undefined) {
-        updates.username = username;
-      }
-      if (email !== undefined) {
-        updates.email = email;
-      }
-      if (password !== undefined) {
-        updates.password = password;
-      }
-      const user = await User.findByIdAndUpdate(id, updates, { new: true });
-      return user;
+    signup: async (parent, args, context, info) => {
+      const user = User();
+      user.username = args.username;
+      user.email = args.email;
+      user.password = await bcrypt.hash(args.password, 10, function(err, hash) {
+        
+    });
+      return user.save();
     },
   },
 };
